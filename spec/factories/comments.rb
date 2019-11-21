@@ -1,5 +1,7 @@
 FactoryBot.define do
   factory :comment do
-    content { "" }
+    content { Faker::Lorem.paragraph(sentence_count: 2) }
+    user
+    article
   end
 end
