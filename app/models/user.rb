@@ -9,7 +9,7 @@ class User < ApplicationRecord
   include DeviseTokenAuth::Concerns::User
 
   # パスワードはアルファベット半角大文字小文字と数字の混合のみ可能にし、文字数制限は8〜32字以内とする
-  VALID_PASSWORD_REGEX = /\A(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)[a-zA-Z\d]{8,32}+\z/
+  VALID_PASSWORD_REGEX = /\A(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)[a-zA-Z\d]{8,32}\z/
   validates :password, presence: true, format: { with: VALID_PASSWORD_REGEX}
   # emailは＠と.の使用を必須にする
   VALID_EMAIL_REGEX = /\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/

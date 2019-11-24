@@ -12,18 +12,17 @@ RSpec.describe User, type: :model do
 
   describe "異常系" do
     context "passwordの文字数が8字より少ないとき" do
-      let(:user){build(:user, password: "12CDef")}
+      let(:user){build(:user, password: "12CDef7")}
       it "エラーになる" do
         user.valid?
-        #binding.pry
-        expect(user.errors.messages[:password]).to include "Password is too short (minimum is 8 characters)"
+        expect(user.errors.messages[:password]).to include "is invalid"
       end
     end
     context "passwordの文字数が32字より多いとき" do
       let(:user){build(:user, password: Faker::Internet.password(min_length: 33, mix_case: true))}
       it "エラーになる" do
         user.valid?
-        expect(user.errors.messages[:password]).to include "Password is too long (maximum is 32 characters)"
+        expect(user.errors.messages[:password]).to include "is invalid"
       end
     end
     context "passwordに数字が入っていないとき" do
@@ -47,39 +46,66 @@ RSpec.describe User, type: :model do
         expect(user.errors.messages[:password]).to include "is invalid"
       end
     end
-
-    context "タイトルを入力していないとき" do
-        let(:article){build(:article,title: nil)}
-        it "記事が保存できない" do
-        article.valid?
-        expect(article.errors.messages[:title]).to include "can't be blank"
+    context "passwordが入力されていないとき" do
+      let(:user){build(:user, password: nil)}
+      it "登録できない" do
+        user.valid?
+        expect(user.errors.messages[:password]).to include "can't be blank"
       end
     end
-    context "本文を入力していないとき" do
-      let(:article){build(:article,body: nil)}
-      it "記事が保存できない" do
-      article.valid?
-      expect(article.errors.messages[:body]).to include "can't be blank"
+
+    context "emailに@を入力していないとき" do
+      let(:user){build(:user,email: "1234asdf.co.jp")}
+        it "エラーになる" do
+        user.valid?
+        expect(user.errors.messages[:email]).to include "is invalid"
       end
     end
-  end
-
-  context "account を指定していないとき" do
-    it "エラーする" do
-      user = build(:user,account: nil)
-      user.valid?
-
-      expect(user.errors.messages[:account]).to include "can't be blank"
+    context "emailに.を入力していないとき" do
+      let(:user){build(:user,email: "1234abcdf@cojp")}
+        it "エラーになる" do
+        user.valid?
+        expect(user.errors.messages[:email]).to include "is invalid"
+      end
     end
-  end
+    context "同一のemailが既に存在するとき" do
+      before {create(:user,email: "1234abcdf@co.jp")}
+      let(:user){build(:user,email: "1234abcdf@co.jp")}
+        it "登録できない" do
+        user.valid?
+        expect(user.errors.messages[:email]).to include "has already been taken"
+      end
+    end
+    context "emailが入力されていないとき" do
+      let(:user){build(:user, email: nil)}
+      it "登録できない" do
+        user.valid?
+        expect(user.errors.messages[:email]).to include "can't be blank"
+      end
+    end
 
-  context "同名のaccountが存在するとき" do
-    it "エラーする" do
-      create(:user,account: "taka")
-      user = build(:user,account: "taka")
-      user.valid?
+    context "nameが入力されていないとき" do
+      let(:user){build(:user, name: nil)}
+      it "登録できない" do
+        user.valid?
+        expect(user.errors.messages[:name]).to include "can't be blank"
+      end
+    end
 
-      expect(user.errors.messages[:account]).to include "has already been taken"
+    context "同一のaccountが既に存在するとき" do
+      before {create(:user,account: "taka")}
+      let(:user){build(:user,account: "taka")}
+        it "登録できない" do
+        user.valid?
+        expect(user.errors.messages[:account]).to include "has already been taken"
+      end
+    end
+    context "accountが入力されていないとき" do
+      let(:user){build(:user, account: nil)}
+      it "登録できない" do
+        user.valid?
+        expect(user.errors.messages[:account]).to include "can't be blank"
+      end
     end
   end
 end
