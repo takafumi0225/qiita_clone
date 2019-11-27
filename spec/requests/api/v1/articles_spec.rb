@@ -8,11 +8,11 @@ RSpec.describe "Api::V1::Articles", type: :request do
       create_list(:article, 3)
     end
 
-    it "記事の一覧が取得できる" do
+    it "記事の一覧及び記事に紐付くユーザ情報が取得できる" do
       subject
       res = JSON.parse(response.body)
       expect(res.length).to eq 3
-      expect(res[0].keys).to eq ["id", "title", "body"]
+      expect(res[0].keys).to eq ["id", "title", "body", "user"]
       expect(response).to have_http_status(:ok)
     end
   end
