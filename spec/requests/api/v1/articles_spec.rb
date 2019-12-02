@@ -61,4 +61,63 @@ RSpec.describe "Api::V1::Articles", type: :request do
       expect(res["body"]).to eq params[:article][:body]
     end
   end
+
+  describe "PATCH /api/v1/articles/:id" do
+    subject { patch(api_v1_article_path(article.id), params: params) }
+
+    let(:params) { { article: attributes_for(:article) } }
+    let(:current_user) { create(:user) }
+
+    before do
+      allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user)
+    end
+
+    context "その記事がログインしているユーザの記事の場合" do
+      let(:article) { create(:article, user: current_user) }
+
+      it "任意の記事のレコードを更新できる" do
+        expect { subject }.to change { article.reload.title }.from(article.title).to(params[:article][:title]) &
+                              change { Article.find(article.id).body }.from(article.body).to(params[:article][:body])
+      end
+    end
+
+    context "その記事がログインしているユーザ以外の記事の場合" do
+      let(:other_user) { create(:user) }
+      let(:article) { create(:article, user: other_user) }
+
+      it "エラーになる" do
+        expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+  end
+
+  describe "DELETE /api/v1/articles/:id" do
+    subject { delete(api_v1_article_path(article.id), params: params) }
+
+    let(:params) { { article: attributes_for(:article) } }
+    let(:current_user) { create(:user) }
+    let!(:article) { create(:article) }
+
+    before do
+      allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user)
+    end
+
+    context "その記事がログインしているユーザの記事の場合" do
+      let(:article) { create(:article, user: current_user) }
+
+      it "任意の記事のレコードを削除できる" do
+        expect { subject }.to change { current_user.articles.count }.by(-1)
+        expect(response).to have_http_status(:no_content)
+      end
+    end
+
+    context "その記事がログインしているユーザ以外の記事の場合" do
+      let(:other_user) { create(:user) }
+      let(:article) { create(:article, user: other_user) }
+
+      it "エラーになる" do
+        expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+  end
 end
