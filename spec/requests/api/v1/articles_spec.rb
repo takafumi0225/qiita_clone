@@ -75,7 +75,7 @@ RSpec.describe "Api::V1::Articles", type: :request do
       let(:article){create(:article, user:current_user)}
 
       it "任意の記事のレコードを更新できる" do
-        expect { subject }.to change { Article.find(article.id).title }.from(article.title).to(params[:article][:title])&
+        expect { subject }.to change { article.reload.title }.from(article.title).to(params[:article][:title])&
         change { Article.find(article.id).body }.from(article.body).to(params[:article][:body])
       end
     end

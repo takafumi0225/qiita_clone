@@ -12,7 +12,7 @@ RSpec.describe User, type: :model do
 
   describe "異常系" do
     context "passwordの文字数が8字より少ないとき" do
-      let(:user) { build(:user, password: Faker::Internet.password(max_length:7, max_length: 7, mix_case: true)) }
+      let(:user) { build(:user, password: Faker::Internet.password(max_length:7, min_length: 7, mix_case: true)) }
       it "エラーになる" do
         user.valid?
         expect(user.errors.messages[:password]).to include "is invalid"
